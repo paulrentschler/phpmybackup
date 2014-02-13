@@ -87,8 +87,10 @@
     // copy the restore program
     //copy("/usr/local/backup/dbrestore.php", $path."dbrestore.php");
 
-    // set the permissions appropriately
-    $cmd = escapeshellcmd('chmod -R 777 '.$path);
+    // change the directory and file group ownership & permissions
+    $cmd = escapeshellcmd('chgrp -R adm '.$path);
+    system($cmd);
+    $cmd = 'chmod -R o-rwx '.substr($path, 0, -1);
     system($cmd);
 
     // figure out how long it took
