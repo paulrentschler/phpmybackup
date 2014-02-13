@@ -76,7 +76,7 @@
     $dbs = mysql_query($sql, $dbh) or die(mysql_error());
 
     while ($db = mysql_fetch_array($dbs)) {
-      if ($db[0] <> 'test') {
+      if ($db[0] <> 'test' && $db[0] <> 'information_schema') {
         // do the backup
         backup_database($db[0]);
       }
