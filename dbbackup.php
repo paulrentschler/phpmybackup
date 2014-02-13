@@ -85,7 +85,7 @@
     unset($db);
 
     // copy the restore program
-    copy("/usr/local/backup/dbrestore.php", $path."dbrestore.php");
+    //copy("/usr/local/backup/dbrestore.php", $path."dbrestore.php");
 
     // set the permissions appropriately
     $cmd = escapeshellcmd('chmod -R 777 '.$path);
