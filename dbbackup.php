@@ -93,6 +93,24 @@
     $cmd = 'chmod -R o-rwx '.substr($path, 0, -1);
     system($cmd);
 
+
+    // tar up the backup files
+    $dest = substr($path, 0, -1).'.tar.gz';
+    $dirs = explode('/', $dest);
+    $backupFile = array_pop($dirs);
+    chdir($path);
+    $cmd = 'tar -cz * > ../'.$backupFile;
+    system($cmd);
+
+    // fix the permissions on the tar file
+    $cmd = escapeshellcmd('chgrp -R adm '.$dest);
+    system($cmd);
+
+    // delete the original backup directory
+    $cmd = 'rm -rf '.substr($path, 0, -1);
+    system($cmd);
+
+
     // figure out how long it took
     $end_timestamp = getmicrotime();
     $runseconds = $end_timestamp - $start_timestamp;
