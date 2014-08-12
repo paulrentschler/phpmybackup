@@ -24,6 +24,10 @@
 
 
 
+  // set the default timezone
+  date_default_timezone_set('America/New_York');
+
+
   // Determine if the backup directory to use was passed as an argument
   if ($_SERVER['argc'] >= 5) {
     for ($i = 1; $i < 5; $i++) {
