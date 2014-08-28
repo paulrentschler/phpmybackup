@@ -41,6 +41,9 @@
     $username = trim($_SERVER['argv'][2]);
     $password = trim($_SERVER['argv'][3]);
     $path = trim($_SERVER['argv'][4]);
+    if ($_SERVER['argc'] == 6) {
+      $encryptionKey = trim($_SERVER['argv'][5]);
+    }
 
     if (!file_exists($path)) {
       unset($path);
@@ -98,13 +101,24 @@
     system($cmd);
 
 
-    // tar up the backup files
-    $dest = substr($path, 0, -1).'.tar.gz';
-    $dirs = explode('/', $dest);
-    $backupFile = array_pop($dirs);
-    chdir($path);
-    $cmd = 'tar -cz * > ../'.$backupFile;
-    system($cmd);
+    if (isset($encryptionKey) && $encryptionKey <> '') {
+      // tar and GPG encrypt the backup files
+      $dest = substr($path, 0, -1).'.bak';
+      $dirs = explode('/', $dest);
+      $backupFile = array_pop($dirs);
+      chdir($path);
+      $cmd = 'tar -cz * | gpg --output ../'.$backupFile.' --encrypt --recipient '.$encryptionKey;
+      system($cmd);
+
+    } else {
+      // tar up the backup files
+      $dest = substr($path, 0, -1).'.tar.gz';
+      $dirs = explode('/', $dest);
+      $backupFile = array_pop($dirs);
+      chdir($path);
+      $cmd = 'tar -cz * > ../'.$backupFile;
+      system($cmd);
+    }
 
     // fix the permissions on the tar file
     $cmd = escapeshellcmd('chgrp -R adm '.$dest);
