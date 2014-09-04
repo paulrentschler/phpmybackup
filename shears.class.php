@@ -120,7 +120,8 @@ class Shears
     protected function prunePath($level)
     {
         $levelIndex = array_search($level, array_keys($this->levels));
-        $files = scandir($this->levels[$level]['path'], SCANDIR_SORT_DESCENDING);
+        // get the files and sort them descending
+        $files = scandir($this->levels[$level]['path'], 1);
         if ($files !== false) {
             $validBackups = Array();
             foreach ($files as $file) {
