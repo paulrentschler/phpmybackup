@@ -263,12 +263,12 @@
 
     $runtime = "";
     if (isset($hours)) {
-      $runtime .= $hours." Hours ";
+      $runtime .= $hours." hours ";
     }
     if (isset($minutes)) {
-      $runtime .= $minutes." Minutes ";
+      $runtime .= $minutes." minutes ";
     }
-    $runtime .= number_format($runseconds, 2)." Seconds";
+    $runtime .= number_format($runseconds, 2)." seconds";
 
     return $runtime;
   }
