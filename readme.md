@@ -8,8 +8,9 @@ PHP shell script for backing up MySQL databases.
 - backups are contained to a folder named by the date (yyyy-mm-dd format)
 - creates a file with the structure of each table
 - creates a file with the data of each table
-- files areP tarred and gzipped after the backup
-- files can be GPG encrypted
+- files are tarred and gzipped after the backup
+- files can be optionally GPG encrypted
+- individual tables can be excluded from the backup
 - pruning script provided to limit the number of backups retained
 
 
@@ -97,4 +98,20 @@ PHP 5.x with CLI support
         ### Run the MySQL backup every morning at 5am
          00   5  *  *  *  bakuser      /usr/local/scripts/dbbackup/dailybackup.php
 
+
+## Excluding tables from the backup
+
+To exclude individual database tables from the backup list them in a file
+called `exclude.txt` that is located in same folder as the `dbbackup.php` file.
+The `exclude.txt` file is automatically excluded from the Mercurial repository.
+
+Each database table to exclude should be listed on it's own line and specified
+using the `<database_name>.<table_name>` syntax.
+
+Example:
+
+    mysql.user
+    mysql.host
+
+This would exclude the `user` and `host` tables in the `mysql` database.
 
