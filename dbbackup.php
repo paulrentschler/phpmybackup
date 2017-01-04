@@ -67,6 +67,22 @@
       $dbh = mysql_connect($server, $username, $password) or die($error_msg);
     }
 
+    // read in a list of database tables to exclude
+    set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
+      // error was suppressed with the @-operator
+      if (0 === error_reporting()) {
+        return false;
+      }
+      throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+    });
+    try {
+      $exclude_raw = file_get_contents(dirname(__file__).'/exclude.txt');
+    } catch (ErrorException $e) {
+      $exclude_raw = '';
+    }
+    restore_error_handler();
+    $exclude_tables = explode("\n", $exclude_raw);
+
     // start the backup log
     $LOG = fopen($path.date("Y-m-d")."_stats.log", "w");
     fwrite($LOG, "MySQL Database Backup Log\r\n\r\n");
@@ -85,7 +101,7 @@
       // skip the `test` and `information_schema` databases
       if ($db[0] <> 'test' && $db[0] <> 'information_schema') {
         // do the backup
-        backup_database($db[0]);
+        backup_database($db[0], $exclude_tables);
       }
     }
     mysql_free_result($dbs);
@@ -156,10 +172,12 @@
   /**
    * Backup all the tables in the specified database
    *
-   * @param   string dbname  a string containing the name of the database
+   * @param   string dbname          a string containing the name of the database
+   * @param   array  exclude_tables  an array containing database.table entries
+   *                                 that should be excluded from the backup
    * @return  void
    */
-  function backup_database($dbname)
+  function backup_database($dbname, $exclude_tables)
   {
     global $dbh, $path, $LOG;
     global $server, $username, $password;
@@ -189,6 +207,13 @@
       if ($dbname == 'mysql' && $tablename == 'event') {
         // mysqldump throws a warning and skips the mysql.event table so this
         //   should hopefully avoid the warning
+        continue;
+      }
+
+      // see if this table should be excluded from the backup
+      $fqn = $dbname.'.'.$tablename;
+      if (in_array($fqn, $exclude_tables)) {
+        echo "     Skipping table: ".$fqn."\n";
         continue;
       }
 
