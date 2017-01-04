@@ -1,34 +1,31 @@
 #!/usr/bin/php
 
 <?php
-  // ----------------------------------------------------
-  // this program is meant to be run as a shell script
-  //  or automated as a cron job.
-  // ----------------------------------------------------
+  /**
+   * Shell script for backing up MySQL databases
+   *
+   * For each database, a folder is created to hold the backup files that are
+   * generated. For each database table, the structure is output in a
+   * `structure.sql` file and the data is output in a separate `data.sql` file.
+   *
+   * A `stats.log` file is created in the main backup folder that includes
+   * details about everything that was backed up.
+   *
+   * The entire backup directory is compressed using tar and gzip into a single
+   * backup file that can optionally be encrypted with GPG.
+   */
 
 
-/*
-  Each database gets a folder
-  For each database output a structure.sql file that has the structure of all tables
-  For each table in the database output the data into a seperate file
-  For each database create a restore script that recreates the database, structure, and loads the data
-  Create a stats.log file in the main folder with the runtime and all the things created.
-*/
-
-  // ----------------------------------------------------
   //  define the MySQL Server variables
-     $server = "";
-     $username="";
-     $password="";
-  // ----------------------------------------------------
-
-
+  $server = "";
+  $username="";
+  $password="";
 
   // set the default timezone
   date_default_timezone_set('America/New_York');
 
 
-  // Determine if the backup directory to use was passed as an argument
+  // verify that all the necessary parameters have been provided
   if ($_SERVER['argc'] >= 5) {
     for ($i = 1; $i < 5; $i++) {
       if (trim($_SERVER['argv'][$i]) == '') {
@@ -70,7 +67,7 @@
       $dbh = mysql_connect($server, $username, $password) or die($error_msg);
     }
 
-    // open the stats file to log too
+    // start the backup log
     $LOG = fopen($path.date("Y-m-d")."_stats.log", "w");
     fwrite($LOG, "MySQL Database Backup Log\r\n\r\n");
     fwrite($LOG, "Backing Up Server: ".$server."\r\n");
@@ -81,8 +78,8 @@
     // get a list of the databases
     $sql = "SHOW databases";
     $dbs = mysql_query($sql, $dbh) or die(mysql_error());
-
     while ($db = mysql_fetch_array($dbs)) {
+      // skip the `test` and `information_schema` databases
       if ($db[0] <> 'test' && $db[0] <> 'information_schema') {
         // do the backup
         backup_database($db[0]);
@@ -94,7 +91,7 @@
     // copy the restore program
     //copy("/usr/local/backup/dbrestore.php", $path."dbrestore.php");
 
-    // change the directory and file group ownership & permissions
+    // fix the directory and file group ownership and permissions
     $cmd = escapeshellcmd('chgrp -R adm '.$path);
     system($cmd);
     $cmd = 'chmod -R o-rwx '.substr($path, 0, -1);
@@ -149,7 +146,15 @@
 
 
 <?php
-  function backup_database($dbname) {
+
+  /**
+   * Backup all the tables in the specified database
+   *
+   * @param   string dbname  a string containing the name of the database
+   * @return  void
+   */
+  function backup_database($dbname)
+  {
     global $dbh, $path, $LOG;
     global $server, $username, $password;
 
@@ -196,13 +201,17 @@
     unset($table);
 
     fwrite($LOG, "\r\n");
-
-  }  // end of function backup_database($dbname)
-
+  }
 
 
-  function display_syntax_error() {
-    // there is no valid backup directory, inform the user
+
+  /**
+   * Output the syntax for the command
+   *
+   * @return  void
+   */
+  function display_syntax_error()
+  {
     echo "----------------------------------------------------------------------\n";
     echo " Syntax: ./dbbackup <MySQL Server> <username> <password> <backup dir>\n";
     echo "----------------------------------------------------------------------\n";
@@ -210,17 +219,30 @@
 
 
 
-  function getmicrotime() {
-
+  /**
+   * Get the current time in microseconds
+   *
+   * @return  float  the current time in microseconds
+   */
+  function getmicrotime()
+  {
     list($usec, $sec) = explode(" ",microtime());
     return ((float)$usec + (float)$sec);
-
-  }  // end of function getmicrotime()
-
+  }
 
 
-  function format_runtime($runseconds) {
 
+  /**
+   * Format the microsecond run time into a human-friendly time
+   *
+   * Example output:  2 Hours 14 Minutes 42 Seconds
+   *
+   * @param   float runseconds  a float of microseconds to display
+   * @return  string  a string representing the microseconds value in hours,
+   *                  minutes, and seconds
+   */
+  function format_runtime($runseconds)
+  {
     if ($runseconds > 3600) {
       $hours = floor($runseconds / 3600);
       $runseconds -= ($hours * 3600);
@@ -240,6 +262,7 @@
     $runtime .= number_format($runseconds, 2)." Seconds";
 
     return $runtime;
+  }
 
-  }  // end of funtion format_runtime($runseconds)
 ?>
+
