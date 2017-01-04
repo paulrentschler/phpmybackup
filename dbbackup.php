@@ -75,6 +75,9 @@
     fwrite($LOG, "-----------------------------------------------------------------\r\n");
     $start_timestamp = getmicrotime();
 
+    // output the backup start to the screen
+    echo "MySQL database backup for (".$server.") started on: ".date('m/d/Y h:i')."\n";
+
     // get a list of the databases
     $sql = "SHOW databases";
     $dbs = mysql_query($sql, $dbh) or die(mysql_error());
@@ -137,6 +140,9 @@
     fwrite($LOG, "-----------------------------------------------------------------\r\n");
     fwrite($LOG, "\r\n\r\n");
 
+    // output the completion stats to the screen
+    echo "\nBackup finished on ".date('m/d/Y h:i')." in ".format_runtime($runseconds);
+
     fclose($LOG);
   }
 
@@ -160,6 +166,9 @@
 
     // log it
     fwrite($LOG, "Backing Up Database: ".$dbname."\r\n");
+
+    // output progress
+    echo "    Backing up database: ".$dbname
 
     // select the database
     mysql_select_db($dbname, $dbh);
