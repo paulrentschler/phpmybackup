@@ -172,6 +172,11 @@
 
     while ($table = mysql_fetch_array($tables)) {
       $tablename = $table[0];
+      if ($dbname == 'mysql' && $tablename == 'event') {
+        // mysqldump throws a warning and skips the mysql.event table so this
+        //   should hopefully avoid the warning
+        continue;
+      }
 
       // output the structure
       $filename = date("Y-m-d")."_structure_".$tablename.".sql";
