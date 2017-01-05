@@ -155,20 +155,20 @@ class Shears
                 $yearlyIndex = array_search('yearly', array_keys($this->levels));
                 foreach ($validBackups as $date) {
                     if ($levelIndex < $weeklyIndex && $this->isEndOfWeek($date)) {
-                        echo '  moving '.date('Y-m-d', $date).' to weekly'."\n";
+                        echo '  moving '.$level.'/'.date('Y-m-d', $date).' to weekly'."\n";
                         $this->move($date, $level, 'weekly');
 
                     } elseif ($levelIndex < $monthlyIndex && $this->isEndOfMonth($date)) {
-                        echo '  moving '.date('Y-m-d', $date).' to monthly'."\n";
+                        echo '  moving '.$level.'/'.date('Y-m-d', $date).' to monthly'."\n";
                         $this->move($date, $level, 'monthly');
 
                     } elseif ($levelIndex < $yearlyIndex && $this->isEndOfYear($date)) {
-                        echo '  moving '.date('Y-m-d', $date).' to yearly'."\n";
+                        echo '  moving '.$level.'/'.date('Y-m-d', $date).' to yearly'."\n";
                         $this->move($date, $level, 'yearly');
 
                     } else {
                         // doesn't go to another level, delete it
-                        echo '  deleting '.date('Y-m-d', $date)."\n";
+                        echo '  deleting '.$level.'/'.date('Y-m-d', $date)."\n";
                         $this->delete($date, $level);
                     }
                 }
